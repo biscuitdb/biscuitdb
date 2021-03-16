@@ -33,6 +33,6 @@ jobs:
         - name: run tests
           working-directory: ./build
           run: |
-            make check-clang-tidy
+            # make check-clang-tidy
             make check-lint
             make check-format
