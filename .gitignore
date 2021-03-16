@@ -1,5 +1,9 @@
 # build dir
 build
+cmake-build-debug/
+
+#configs
+.idea
 
 # Prerequisites
 *.d
