@@ -4,5 +4,5 @@ namespace biscuit {
 /**
  * Dummy function to test setup clang and build config
  */
-void test();
+void Test();
 }  // namespace biscuit

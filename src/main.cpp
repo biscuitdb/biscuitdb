@@ -16,15 +16,15 @@
  *-------------------------------------------------------------------------
  */
 
-#include <biscuit.hpp>
-using namespace std;
-using namespace biscuit;
+#include <biscuit.h>
+using biscuit::Test;
+using std::cout;
 
 /*
  * Any biscuitdb server process begins execution here.
  */
-int main() {
+auto main() -> int {
   // print a hello world message
-  test();
+  Test();
   return 0;
 }
