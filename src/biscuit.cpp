@@ -1,4 +1,4 @@
-#include <biscuit.hpp>
-using namespace std;
+#include <biscuit.h>
+using std::cout;
 
-void biscuit::test() { cout << "Hello from biscuit db.\n"; }
+void biscuit::Test() { cout << "Hello from biscuit db.\n"; }

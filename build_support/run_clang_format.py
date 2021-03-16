@@ -16,7 +16,6 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-# Modified from the Apache Arrow project for the Terrier project.
 
 import argparse
 import codecs

@@ -157,7 +157,7 @@ def run_tidy(args, tmpdir, build_path, queue, lock, failed_files):
     """Takes filenames out of queue and runs clang-tidy on them."""
     while True:
         name = queue.get()
-        print("\r Checking: {}".format(name), end='')
+        print("\r Checking: {}".format(name))
         sys.stdout.flush()
         invocation = get_tidy_invocation(name, args.clang_tidy_binary, args.checks,
                                          tmpdir, build_path, args.header_filter,
@@ -266,6 +266,8 @@ def main():
     database = json.load(open(os.path.join(build_path, db_path)))
     files = [make_absolute(entry['file'], entry['directory'])
              for entry in database]
+
+    files = list(set(files))
 
     max_task = args.j
     if max_task == 0:
