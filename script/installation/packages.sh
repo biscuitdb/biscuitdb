@@ -31,6 +31,7 @@ LINUX_TEST_PACKAGES=(\
 
 # Packages to be installed through pip3.
 PYTHON_BUILD_PACKAGES=(
+  "cpplint"
 )
 PYTHON_TEST_PACKAGES=(
 )
