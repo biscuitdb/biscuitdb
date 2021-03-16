@@ -1,0 +1,270 @@
+# File templated from https://github.com/cmu-db/noisepage/
+
+# Resources for learning about _modern_ CMake:
+# - https://llvm.org/docs/CMakePrimer.html LLVM's CMake guide. Start here.
+# - https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1 Gist: This is essentially Pfeifer's talk.
+# - https://www.youtube.com/watch?v=bsXLMQ6WgIk Talk: C++Now 2017 Daniel Pfeifer "Effective CMake".
+# - https://www.youtube.com/watch?v=eC9-iRN2b04 Talk: CppCon2017 Mathieu Ropert "Using Modern CMake Patterns ...".
+# - https://cliutils.gitlab.io/modern-cmake/    Book: Modern CMake. Some examples are no longer modern.
+# - The official cmake.org site is full of outdated anti-patterns. Use for documentation, not for inspiration.
+
+# Also, if you use CMake syntax for multiline comments, a kitten dies.
+# If you didn't know that CMake has multiline comments, good.
+
+# Explanations of various CMake quirks here.
+
+#   1. A crash course on CMake's GLOB and GLOB_RECURSE.
+#       CMake is not a build system -- CMake will not build your files.
+#       CMake is a build system generator -- CMake will generate something (make, ninja, etc.) that builds your files.
+#
+#       How do you specify what files should get built?
+#       - Well, you can either specify every single file manually, which is as horrible as it sounds. "Best practice".
+#       - The old and not-recommended way is to use a GLOB, which creates a list of files.
+#             Tangent: In CMake, a list is merely a ;-separated string. State of the art 2020 technology right there.
+#
+#       The problem with GLOB and GLOB_RECURSE is that the files are known to the build system _generator_, rather than
+#       the build system. So you run GLOB and give a list of files to CMake. CMake hardcodes all these files when CMake
+#       generates your build system. Later, you add a new .h or .cpp file, and your build system doesn't pick it up,
+#       because the build system needs to be regenerated! Incidentally, CLion has a File > Reload CMake Project button
+#       handy for this reason. To summarize the problem: "if you're hardcoding a list of files into your build system,
+#       you're not going to pick up new files".
+#
+#       Well, specifying every single source file in CMake still sounds like a pain. Instead, the band-aid hack "modern"
+#       solution is to specify CONFIGURE_DEPENDS. This means "if the build system supports this feature, if anything in
+#       the GLOB changes, rerun CMake". In practice, our build system is Ninja or Make, and both support this.
+#
+#   2. Footgun warning: target_include_directories.
+#       You must specify SYSTEM includes (typically disables warnings and errors from those includes) separately from
+#       non-SYSTEM. In other words, always do
+#           target_include_directories(target_name PUBLIC foo INTERFACE bar PRIVATE baz)
+#           target_include_directories(target_name SYSTEM PUBLIC foo INTERFACE bar PRIVATE baz)
+#       and never do
+#           target_include_directories(target_name PUBLIC foo SYSTEM PRIVATE blah)
+#       because the latter does not do what you think it does.
+#
+#   3. Footgun warning: FetchProject_ and friends automatically lowercase the project name.
+#       If you're looking for ${someProject_SOURCE_DIR}, that capital letter will ruin your day.
+#       Try doing string(TOLOWER ${someProject} someProject_LOWER) and using ${${someProject_LOWER}_SOURCE_DIR} instead.
+#      
+# Organization of this file. (You can Ctrl-F for these!)
+#   HEADER Project definition.
+#   HEADER Safety checks.
+#   HEADER System info.
+#   HEADER biscuitdb libraries.
+#   HEADER biscuitdb binary.
+#   HEADER Tests.
+#   HEADER Benchmarks.
+#   HEADER Generated file destinations.
+#   HEADER Miscellaneous.
+
+#######################################################################################################################
+# HEADER Project definition.
+#######################################################################################################################
+
+# Ubuntu 20.04 ships with CMake version 3.16.3. But CI on Mac is outdated and picking up 3.15.
+cmake_minimum_required(VERSION 3.16)
+
+# CMake has extremely limited support for multi-line string literals. Therefore an explicit CONCAT call is used here.
+string(
+        CONCAT
+        BISCUITDB_DESCRIPTION
+        "BiscuitDB is an in-memory relational DBMS designed from the ground up for autonomous deployment by the Database "
+        "Group at the Department of Computer Science and Engineering, Jadavpur University. Our research focuses on "
+        "building system components that support such self-driving operation with little to no human guidance. We seek to "
+        "create a system that is better than traditional disk based database systems both in terms of performane and "
+        "reliability"
+)
+
+# Set the name of the CMake project to BiscuitDB. This also automatically defines various magic variables,
+# such as ${PROJECT_SOURCE_DIR} and ${PROJECT_BINARY_DIR}.
+project(
+        BiscuitDB
+        # The version number of the BiscuitDB project.
+        # The individual components can be extracted with ${PROJECT_VERSION_MAJOR}, ${PROJECT_VERSION_MINOR},
+        # ${PROJECT_VERSION_PATCH}, and ${PROJECT_VERSION_TWEAK} respectively.
+        VERSION 1.0.0.0
+        DESCRIPTION "${BISCUITDB_DESCRIPTION}"
+        # BiscuitDB is a C++ project.
+        LANGUAGES CXX
+)
+
+# Create a compile_commands.json file that can be easily parsed by build tools, clang-tidy, etc.
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+#######################################################################################################################
+# HEADER Safety checks.
+#######################################################################################################################
+
+# People keep running CMake in the wrong folder, completely nuking their project or creating weird bugs.
+# This checks if you're running CMake from a folder that already has CMakeLists.txt.
+# Importantly, this catches the common case of running it from the root directory.
+file(TO_CMAKE_PATH "${PROJECT_BINARY_DIR}/CMakeLists.txt" PATH_TO_CMAKELISTS_TXT)
+if (EXISTS "${PATH_TO_CMAKELISTS_TXT}")
+    message(FATAL_ERROR "Run CMake from a build subdirectory! \"mkdir build ; cd build ; cmake ..\" \
+    Some junk files were created in this folder (CMakeCache.txt, CMakeFiles); you should delete those.")
+endif ()
+
+#######################################################################################################################
+# HEADER System info.
+#######################################################################################################################
+
+# Print a welcome message with the project's version number.
+message(STATUS
+        "Welcome to BiscuitDB!\n\
+        Version: ${PROJECT_VERSION}\n")
+
+# CMAKE_MODULE_PATH is the search path for the include() and find_package() CMake commands.
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
+
+message(STATUS "Compiler: ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+message(STATUS "System: ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION} ${CMAKE_SYSTEM_PROCESSOR}")
+
+function(print_sys_info QUERY_TARGET)
+    cmake_host_system_information(RESULT SYS_INFO QUERY ${QUERY_TARGET})
+    message(STATUS "  System ${QUERY_TARGET}: ${SYS_INFO}")
+endfunction()
+print_sys_info("NUMBER_OF_LOGICAL_CORES;NUMBER_OF_PHYSICAL_CORES")
+print_sys_info("HOSTNAME;FQDN")
+print_sys_info("AVAILABLE_VIRTUAL_MEMORY;TOTAL_VIRTUAL_MEMORY")
+print_sys_info("AVAILABLE_PHYSICAL_MEMORY;TOTAL_PHYSICAL_MEMORY")
+print_sys_info("IS_64BIT;HAS_IA64")
+print_sys_info("HAS_FPU;HAS_MMX;HAS_MMX_PLUS")
+print_sys_info("HAS_SSE;HAS_SSE2;HAS_SSE_FP;HAS_SSE_MMX")
+print_sys_info("HAS_AMD_3DNOW;HAS_AMD_3DNOW_PLUS")
+print_sys_info("HAS_SERIAL_NUMBER;PROCESSOR_SERIAL_NUMBER")
+print_sys_info("PROCESSOR_NAME;PROCESSOR_DESCRIPTION")
+print_sys_info("OS_NAME;OS_RELEASE;OS_VERSION;OS_PLATFORM")
+
+#######################################################################################################################
+# HEADER CMake options and global variables.
+# CMake build types, specify with -DCMAKE_BUILD_TYPE={option}.
+#   Debug (default), Release, RelWithDebInfo, FastDebug.
+#   In practice people only use Debug or Release.
+#######################################################################################################################
+
+# Default to DEBUG builds if -DCMAKE_BUILD_TYPE was not specified.
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug)
+endif (NOT CMAKE_BUILD_TYPE)
+
+# Everything else in this section will populate the following global variables.
+set(BISCUITDB_COMPILE_OPTIONS "")
+set(BISCUITDB_LINK_LIBRARIES "")
+set(BISCUITDB_LINK_OPTIONS "")
+set(BISCUITDB_INCLUDE_DIRECTORIES "")
+
+# Add compilation flags to BISCUITDB_COMPILE_OPTIONS based on the current CMAKE_BUILD_TYPE.
+string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG")
+    list(APPEND BISCUITDB_COMPILE_OPTIONS "-ggdb" "-O0" "-fno-omit-frame-pointer" "-fno-optimize-sibling-calls")
+elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "FASTDEBUG")
+    list(APPEND BISCUITDB_COMPILE_OPTIONS "-ggdb" "-O1" "-fno-omit-frame-pointer" "-fno-optimize-sibling-calls")
+elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "RELEASE")
+    list(APPEND BISCUITDB_COMPILE_DEFINITIONS "-DNDEBUG")
+    list(APPEND BISCUITDB_COMPILE_OPTIONS "-O3")
+elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "RELWITHDEBINFO")
+    list(APPEND BISCUITDB_COMPILE_DEFINITIONS "-DNDEBUG")
+    list(APPEND BISCUITDB_COMPILE_OPTIONS "-ggdb" "-O2")
+else ()
+    message(FATAL_ERROR "Unknown build type: ${CMAKE_BUILD_TYPE}")
+endif ()
+message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+
+#######################################################################################################################
+# HEADER biscuitdb libraries.
+# biscuitdb_objlib      :   BiscuitDB object library, built once and linked into both static and shared targets.
+# biscuitdb_static      :   All of BiscuitDB functionality exposed as a static library.
+# biscuitdb_shared      :   All of BiscuitDB functionality exposed as a shared library.
+#######################################################################################################################
+
+# Get the list of all BiscuitDB sources.
+file(GLOB_RECURSE
+        BISCUITDB_SRCS                  # Store the list of files into the variable ${BISCUITDB_SRCS}.
+        CONFIGURE_DEPENDS               # See above. Ask CMake to regenerate the build system if these files change.
+        ${PROJECT_SOURCE_DIR}/src/*.cpp
+        ${PROJECT_SOURCE_DIR}/src/include/*.h
+    )
+# Remove the main program from BiscuitDB sources.
+list(REMOVE_ITEM BISCUITDB_SRCS ${PROJECT_SOURCE_DIR}/src/main.cpp)
+
+# Build BiscuitDB as an OBJECT library first, i.e., a .o file per corresponding .cpp file.
+# The OBJECT library is built first so that the same .o files can be linked into static and shared libraries.
+# This allows both biscuitdb_static and biscuitdb_shared to be built with a single compilation of translation units.
+add_library(biscuitdb_objlib OBJECT ${BISCUITDB_SRCS})
+
+set_target_properties(biscuitdb_objlib PROPERTIES
+        POSITION_INDEPENDENT_CODE ON                # Required for static linking into other shared libraries.
+        CXX_EXTENSIONS OFF                          # Disable compiler extensions (e.g., use c++17 not gnu17).
+        )
+target_compile_definitions(biscuitdb_objlib PUBLIC  # PUBLIC: all consumers of the library inherit the following.
+        ${BISCUITDB_COMPILE_DEFINITIONS}
+        )
+target_compile_options(biscuitdb_objlib PRIVATE     # PRIVATE: only biscuitdb_objlib uses the following.
+        "-Werror"                                   # Treat warnings as errors.
+        "-Wall"                                     # Enable "all" warnings. (Not actually all warnings.)
+        )
+target_compile_options(biscuitdb_objlib PUBLIC      # PUBLIC: all consumers of the library inherit the following.
+        "-march=native"                             # Enable machine-specific instruction sets and optimizations.
+        "-mcx16"                                    # Allow CMPXCHG16B (16-byte compare and exchange).
+        ${BISCUITDB_COMPILE_OPTIONS}
+        )
+target_compile_features(biscuitdb_objlib PUBLIC     # PUBLIC: all consumers of the library inherit the following.
+        cxx_std_17                                  # Require support for C++17.
+        )
+target_include_directories(biscuitdb_objlib PUBLIC  # PUBLIC: all consumers of the library inherit the following.
+        ${PROJECT_SOURCE_DIR}/src/include           # Include BiscuitDB src/include/ headers.
+        )
+target_link_options(biscuitdb_objlib PUBLIC         # PUBLIC: all consumers of the library inherit the following.
+        ${BISCUITDB_LINK_OPTIONS}
+        )
+
+# Create the biscuitdb_static and biscuitdb_shared libraries using the objects from biscuitdb_objlib.
+add_library(biscuitdb_static STATIC $<TARGET_OBJECTS:biscuitdb_objlib>)     # Bundle up these objects into static lib.
+target_link_libraries(biscuitdb_static PUBLIC biscuitdb_objlib)             # Consumers will inherit this link.
+target_compile_options(biscuitdb_static PUBLIC      # PUBLIC: all consumers of the library inherit the following.
+        "-fvisibility=hidden"                       # Hide symbols by default.
+        )
+target_link_options(biscuitdb_static PUBLIC         # PUBLIC: all consumers of the library inherit the following.
+        "-fvisibility=hidden"                       # Hide symbols by default.
+        )
+
+#######################################################################################################################
+# HEADER biscuitdb binary.
+# biscuitdb             :   The main DBMS binary.
+#######################################################################################################################
+
+add_executable(biscuitdb src/main.cpp)
+target_compile_options(biscuitdb PRIVATE "-Werror" "-Wall")
+target_link_libraries(biscuitdb biscuitdb_static)
+
+#######################################################################################################################
+# HEADER Tests.
+#######################################################################################################################
+
+# todo
+
+#######################################################################################################################
+# HEADER Benchmarks.
+#######################################################################################################################
+
+# todo
+
+#######################################################################################################################
+# HEADER Generated file destinations.
+#######################################################################################################################
+
+set_target_properties(
+        biscuitdb_static
+        biscuitdb
+        PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
+
+#######################################################################################################################
+# HEADER Miscellaneous.
+# This is where helper scripts and other random CMake stuff goes.
+#######################################################################################################################
+
+# todo
