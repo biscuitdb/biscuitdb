@@ -1,0 +1,39 @@
+name: Build Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  linux-build:
+    runs-on: ubuntu-latest
+
+    steps:
+        - uses: actions/checkout@v2
+
+        - name: setup environment
+          run: |
+            export DEBIAN_FRONTEND="noninteractive"
+            mkdir build
+            apt-get -y update
+            apt-get -y install sudo 
+        
+        - name: installing dependecies
+          run: echo -y | ./script/installation/packages.sh all
+
+        - name: build 
+          working-directory: ./build
+          run: |
+            cmake  ../
+            make -j4
+        
+        - name: run tests
+          working-directory: ./build
+          run: |
+            make check-clang-tidy
+            make check-lint
+            make check-format
