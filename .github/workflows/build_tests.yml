@@ -22,17 +22,25 @@ jobs:
             sudo apt-get -y update
         
         - name: installing dependecies
-          run: sudo su && echo -y | ./script/installation/packages.sh all
+          run: |
+            sudo su
+            echo -y | ./script/installation/packages.sh all
 
         - name: build 
           working-directory: ./build
           run: |
             cmake  ../
-            make -j4
+            make -j2
         
-        - name: run tests
+        - name: check linting & formatting
           working-directory: ./build
           run: |
-            # make check-clang-tidy
-            make check-lint
             make check-format
+            make check-lint
+            make check-clang-tidy
+            
+        - name: run unit-tests
+          working-directory: ./build
+          run: |
+            make test
+            

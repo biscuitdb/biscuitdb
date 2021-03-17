@@ -20,7 +20,8 @@ LINUX_BUILD_PACKAGES=(\
   "git" \
   "pkg-config" \
   "python3-pip" \
-  "ninja-build"
+  "python-is-python3" \
+  "ninja-build" \
   "wget" \
   "time" \
 )
