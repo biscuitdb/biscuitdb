@@ -10,6 +10,9 @@
 # Modified from the LLVM project for the Terrier project.
 #===------------------------------------------------------------------------===#
 # FIXME: Integrate with clang-tidy-diff.py
+#
+# Modified from the CMU-DB NoisePage project for the BiscuitDB project.
+#
 
 """
 Parallel clang-tidy runner

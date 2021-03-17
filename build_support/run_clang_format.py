@@ -16,6 +16,10 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+# Modified from the Apache Arrow project for the Terrier project.
+#
+# Modified from the CMU-DB NoisePage project for the BiscuitDB project.
+#
 
 import argparse
 import codecs
