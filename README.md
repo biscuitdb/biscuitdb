@@ -17,7 +17,7 @@ BiscuitDB is a relational database management system developed by the Jadavpur U
 The BiscuitDB project is built and tested on **Ubuntu 20.04**.
 
 ```
-git clone (todo: add link)
+git clone https://github.com/ju-db/biscuitdb.git
 cd biscuitdb
 sudo ./script/installation/packages.sh
 mkdir build
@@ -33,8 +33,7 @@ Additional Notes:
 
 ## For Developers
 
-Please see the docs. (todo: add link) 
-
+Please see the [docs](https://github.com/ju-db/biscuitdb/tree/master/docs/).  
 
 ## Contributing
 
