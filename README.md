@@ -4,7 +4,7 @@
 
 -----------------
 
-(todo: add jenkins status)
+![build](https://github.com/ju-db/biscuitdb/actions/workflows/build_tests.yml/badge.svg?branch=master)
 (todo: add codecov status)
 
 BiscuitDB is a relational database management system developed by the Jadavpur University Database Group. The research goal of the BiscuitDB project is to develop high-performance system components that support autonomous operation and optimization as a first-class design principle. This project is highly inspired by CMU's
