@@ -58,9 +58,9 @@ If you run into issues, you may need your default `python` to point to a `python
    - `git push -u origin my_new_branch`
 5. Go to GitHub and open a [new pull request](https://github.com/ju-db/biscuitdb/compare).
 6. When a pull request is opened, this triggers our Continuous Integration environment on circle-ci.
-   - Jenkins will clone the repo, apply your changes, and make sure that formatting, linting, tests, etc pass.
+   - CI will clone the repo, apply your changes, and make sure that formatting, linting, tests, etc pass.
    - Code has to pass all the checks for it to be merged!
 
 ### Running tests locally
 
-todo
+Use make test or ninja test to run inside your build folder.

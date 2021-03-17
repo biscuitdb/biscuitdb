@@ -95,7 +95,7 @@ give_up() {
   echo "Be sure to include the contents of this message."
   echo "Platform: $(uname -a)"
   echo
-  echo "(todo: add repo issues link)"
+  echo "https://github.com/ju-db/biscuitdb/issues"
   echo
   exit 1
 }
