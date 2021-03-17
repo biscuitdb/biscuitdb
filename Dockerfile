@@ -7,9 +7,12 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get -y update 
 RUN apt-get -y install sudo
-COPY script/installation/packages.sh install-script.sh 
-RUN echo y | ./install-script.sh all
-
 COPY . /biscuitdb
+WORKDIR /biscuitdb
+
+RUN echo y | ./script/installation/packages.sh  all
+RUN mkdir build
+WORKDIR /biscuitdb/build
+RUN cmake -GNinja -DCMAKE_BUILD_TYPE=Release ..
 
 WORKDIR /biscuitdb

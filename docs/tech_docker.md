@@ -27,7 +27,7 @@ See [Docker CE](https://www.docker.com/community-edition) if additional informat
 ## Usage
 
 1. Run the Docker image: `docker run -itd --name build ju-db/biscuitdb`
-3. Run CMake:
+2. Run CMake:
   - `docker exec build cmake ..`
   - `docker exec build make`
 

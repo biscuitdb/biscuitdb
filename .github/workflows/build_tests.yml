@@ -24,23 +24,23 @@ jobs:
         - name: installing dependecies
           run: |
             sudo su
-            echo -y | ./script/installation/packages.sh all
+            echo y | ./script/installation/packages.sh all
 
         - name: build 
           working-directory: ./build
           run: |
-            cmake  ../
-            make -j2
+            cmake -GNinja ..
+            ninja -j2
         
         - name: check linting & formatting
           working-directory: ./build
           run: |
-            make check-format
-            make check-lint
-            make check-clang-tidy
+            ninja check-format
+            ninja check-lint
+            ninja check-clang-tidy
             
         - name: run unit-tests
           working-directory: ./build
           run: |
-            make test
+            ninja test
             
