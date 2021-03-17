@@ -25,6 +25,7 @@ Checks:     '
             portability-*,
             readability-*,
             -modernize-avoid-c-arrays,
+            -modernize-use-trailing-return-type,
             -portability-simd-intrinsics,
             '
 CheckOptions:
@@ -48,3 +49,7 @@ AnalyzeTemporaryDtors: true
 #
 # -modernize-avoid-c-arrays,
 # Not feasible in the storage layer
+# -modernize-use-trailing-return-type
+# GTEST issues
+# -portability-simd-intrinsics
+# simd is required

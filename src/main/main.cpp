@@ -11,13 +11,13 @@
  *
  *
  * IDENTIFICATION
- *	  src/main.cpp
+ *	  src/main/main.cpp
  *
  *-------------------------------------------------------------------------
  */
 
-#include <biscuit.h>
-using biscuit::Test;
+#include "main/biscuit.h"
+using biscuit::Hello;
 using std::cout;
 
 /*
@@ -25,6 +25,6 @@ using std::cout;
  */
 auto main() -> int {
   // print a hello world message
-  Test();
+  Hello();
   return 0;
 }

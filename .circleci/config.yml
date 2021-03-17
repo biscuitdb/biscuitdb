@@ -24,4 +24,4 @@ jobs:
               cd ./build && make check-clang-tidy
               cd ./build && make check-lint
               cd ./build && make check-format
-
+              cd ./build && make test

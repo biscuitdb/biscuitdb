@@ -270,7 +270,8 @@ def main():
     files = [make_absolute(entry['file'], entry['directory'])
              for entry in database]
 
-    files = list(set(files))
+    # Hacks
+    files = list(filter(lambda filename: not "build" in filename, list(set(files))))
 
     max_task = args.j
     if max_task == 0:

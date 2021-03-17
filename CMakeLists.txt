@@ -177,11 +177,6 @@ message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 # biscuitdb_shared      :   All of BiscuitDB functionality exposed as a shared library.
 #######################################################################################################################
 
-#Initial lookup
-set(BISCUITDB_BUILD_SUPPORT_DIR "${CMAKE_SOURCE_DIR}/build_support")
-set(BISCUITDB_CLANG_SEARCH_PATH "/usr/local/bin" "/usr/bin" "/usr/local/opt/llvm/bin" "/usr/local/opt/llvm@8/bin"
-        "/usr/local/Cellar/llvm/8.0.1/bin")
-
 # Get the list of all BiscuitDB sources.
 file(GLOB_RECURSE
         BISCUITDB_SRCS                  # Store the list of files into the variable ${BISCUITDB_SRCS}.
@@ -189,6 +184,9 @@ file(GLOB_RECURSE
         ${PROJECT_SOURCE_DIR}/src/*.cpp
         ${PROJECT_SOURCE_DIR}/src/include/*.h
     )
+
+# Remove the main program from BiscuitDB sources.
+list(REMOVE_ITEM BISCUITDB_SRCS ${PROJECT_SOURCE_DIR}/src/main/main.cpp)
 
 # Build BiscuitDB as an OBJECT library first, i.e., a .o file per corresponding .cpp file.
 # The OBJECT library is built first so that the same .o files can be linked into static and shared libraries.
@@ -236,7 +234,7 @@ target_link_options(biscuitdb_static PUBLIC         # PUBLIC: all consumers of t
 # biscuitdb             :   The main DBMS binary.
 #######################################################################################################################
 
-add_executable(biscuitdb src/main.cpp)
+add_executable(biscuitdb src/main/main.cpp)
 target_compile_options(biscuitdb PRIVATE "-Werror" "-Wall")
 target_link_libraries(biscuitdb biscuitdb_static)
 
@@ -246,6 +244,28 @@ target_link_libraries(biscuitdb biscuitdb_static)
 
 # ctest
 enable_testing()
+
+# gmock gtest https://crascit.com/2015/07/25/cmake-gtest/
+configure_file("${PROJECT_SOURCE_DIR}/build_support/gtest_CMakeLists.txt.in" googletest-download/CMakeLists.txt)
+execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/googletest-download")
+execute_process(COMMAND "${CMAKE_COMMAND}" --build .
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/googletest-download")
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)  # don't override our compiler/linker options when building gtest
+add_subdirectory("${CMAKE_BINARY_DIR}/googletest-src" "${CMAKE_BINARY_DIR}/googletest-build")
+
+# Get the list of all BiscuitDB tests.
+file(GLOB_RECURSE
+        BISCUITDB_TEST_SOURCES                  # Store the list of files into the variable ${BISCUITDB_SRCS}.
+        CONFIGURE_DEPENDS               # See above. Ask CMake to regenerate the build system if these files change.
+        ${PROJECT_SOURCE_DIR}/test/*.cpp
+    )
+
+add_executable(biscuitdb_test ${BISCUITDB_TEST_SOURCES})
+
+add_test(NAME biscuitdb_test COMMAND biscuitdb_test)
+
+target_link_libraries(biscuitdb_test PUBLIC biscuitdb_objlib gtest)
 
 #######################################################################################################################
 # HEADER Benchmarks.
