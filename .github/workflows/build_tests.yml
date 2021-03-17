@@ -23,8 +23,7 @@ jobs:
         
         - name: installing dependecies
           run: |
-            sudo su
-            echo y | ./script/installation/packages.sh all
+            echo y | sudo ./script/installation/packages.sh all
 
         - name: build 
           working-directory: ./build
