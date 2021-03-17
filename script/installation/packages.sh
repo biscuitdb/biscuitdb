@@ -25,6 +25,14 @@ LINUX_BUILD_PACKAGES=(\
   "wget" \
   "time" \
 )
+DARWIN_BUILD_PACKAGES=(\
+  "cmake" \
+  "git" \
+  "pkg-config" \
+  "ninja-build"
+  "wget" \
+)
+
 LINUX_TEST_PACKAGES=(\
   "curl" \
   "lsof" \
@@ -111,6 +119,8 @@ install() {
         *) give_up $DISTRO $VERSION;;
       esac
       ;;
+    DARWIN) install_darwin ;;
+
 
     *) give_up $UNAME $VERSION;;
   esac
@@ -144,6 +154,64 @@ install_linux() {
       python3 -m pip show $pkg || python3 -m pip install $pkg
     done
   fi
+}
+
+install_darwin(){
+
+  echo "Starting install on darwin, this may take some time ..."
+  # Check for Homebrew, install if we don't have it
+  if test ! $(which brew); then
+      echo "Installing homebrew..."
+      ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  fi
+
+  if test ! $(which python3); then
+      echo "Installing pip..."
+      brew install python
+  fi
+ 
+  if test ! $(which pip); then
+      echo "Installing pip..."
+      curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+      python3 get-pip.py
+      rm get-pip.py
+  fi
+  
+
+
+
+  # Update homebrew recipes
+  brew update
+
+  # Install GNU core utilities (those that come with OS X are outdated)
+  brew tap homebrew/dupes
+  brew install coreutils
+
+  if [ "$INSTALL_TYPE" == "build" ] || [ "$INSTALL_TYPE" = "all" ]; then
+    brew install llvm
+    ln -s "$(brew --prefix llvm)/bin/clang-format" "/usr/local/bin/clang-format"
+    ln -s "$(brew --prefix llvm)/bin/clang-tidy" "/usr/local/bin/clang-tidy"
+    ln -s "$(brew --prefix llvm)/bin/clang-apply-replacements" "/usr/local/bin/clang-apply-replacements"
+    brew install $( IFS=$' '; echo "${DARWIN_BUILD_PACKAGES[*]}" )
+  fi
+  if [ "$INSTALL_TYPE" == "test" ] || [ "$INSTALL_TYPE" = "all" ]; then
+    brew install $( IFS=$' '; echo "${LINUX_TEST_PACKAGES[*]}" )
+  fi
+
+  if [ "$INSTALL_TYPE" == "build" ] || [ "$INSTALL_TYPE" = "all" ]; then
+    for pkg in "${PYTHON_BUILD_PACKAGES[@]}"; do
+      python3 -m pip show $pkg || python3 -m pip install $pkg
+    done
+  fi
+  if [ "$INSTALL_TYPE" == "test" ] || [ "$INSTALL_TYPE" = "all" ]; then
+    for pkg in "${PYTHON_TEST_PACKAGES[@]}"; do
+      python3 -m pip show $pkg || python3 -m pip install $pkg
+    done
+  fi
+
+
+
+
 }
 
 main "$@"
