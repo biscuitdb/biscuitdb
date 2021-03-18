@@ -62,7 +62,7 @@
 #######################################################################################################################
 
 # Ubuntu 20.04 ships with CMake version 3.16.3. But CI on Mac is outdated and picking up 3.15.
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.8)
 
 # CMake has extremely limited support for multi-line string literals. Therefore an explicit CONCAT call is used here.
 string(
@@ -252,12 +252,12 @@ execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
 execute_process(COMMAND "${CMAKE_COMMAND}" --build .
         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/googletest-download")
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)  # don't override our compiler/linker options when building gtest
-add_subdirectory("${CMAKE_BINARY_DIR}/googletest-src" "${CMAKE_BINARY_DIR}/googletest-build")
+add_subdirectory("${CMAKE_BINARY_DIR}/googletest-src" "${CMAKE_BINARY_DIR}/googletest-build" EXCLUDE_FROM_ALL)
 
 # Get the list of all BiscuitDB tests.
 file(GLOB_RECURSE
-        BISCUITDB_TEST_SOURCES                  # Store the list of files into the variable ${BISCUITDB_SRCS}.
-        CONFIGURE_DEPENDS               # See above. Ask CMake to regenerate the build system if these files change.
+        BISCUITDB_TEST_SOURCES                  # Store the list of files into the variable ${BISCUITDB_TEST_SOURCES}.
+        CONFIGURE_DEPENDS                       # See above. Ask CMake to regenerate the build system if these files change.
         ${PROJECT_SOURCE_DIR}/test/*.cpp
     )
 
@@ -271,7 +271,34 @@ target_link_libraries(biscuitdb_test PUBLIC biscuitdb_objlib gtest)
 # HEADER Benchmarks.
 #######################################################################################################################
 
-# todo
+configure_file("${PROJECT_SOURCE_DIR}/build_support/benchmark_CMakeLists.txt.in" benchmark-download/CMakeLists.txt)
+execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" "-DCMAKE_BUILD_TYPE=Release ."
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/benchmark-download")
+if(result)
+        message(FATAL_ERROR "CMake step for benchmark failed: ${result}")
+endif()
+execute_process(COMMAND "${CMAKE_COMMAND}" --build . --config "Release"
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/benchmark-download")
+if(result)
+        message(FATAL_ERROR "Build step for benchmark failed: ${result}")
+endif()
+set(benchmark_force_shared_crt ON CACHE BOOL "" FORCE)  # don't override our compiler/linker options when building benchmark
+add_subdirectory("${CMAKE_BINARY_DIR}/benchmark-src" "${CMAKE_BINARY_DIR}/benchmark-build")
+
+# Get the list of all BiscuitDB benchmarks.
+file(GLOB_RECURSE
+        BISCUITDB_BENCHMARK_SOURCES                     # Store the list of files into the variable ${BISCUITDB_BENCHMARK_SOURCES}.
+        CONFIGURE_DEPENDS                               # See above. Ask CMake to regenerate the build system if these files change.
+        ${PROJECT_SOURCE_DIR}/benchmark/*.cpp
+    )
+
+add_executable(biscuitdb_benchmark ${BISCUITDB_BENCHMARK_SOURCES})
+
+# add_test(NAME biscuitdb_benchmark COMMAND biscuitdb_benchmark)
+
+target_link_libraries(biscuitdb_benchmark PUBLIC biscuitdb_objlib benchmark)
 
 #######################################################################################################################
 # HEADER Generated file destinations.
