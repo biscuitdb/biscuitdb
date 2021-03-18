@@ -64,3 +64,10 @@ If you run into issues, you may need your default `python` to point to a `python
 ### Running tests locally
 
 Use make test or ninja test to run inside your build folder.
+
+### Benchmarks
+
+1. Go to the folder: `cd ~/biscuitdb/build`
+2. Generate optimized config with `cmake -GNinja .. -DCMAKE_BUILD_TYPE=Release`
+3. Build project with `ninja`
+4. Run `./biscuitdb_benchmark [...options]`
