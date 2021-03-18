@@ -272,7 +272,7 @@ target_link_libraries(biscuitdb_test PUBLIC biscuitdb_objlib gtest)
 #######################################################################################################################
 
 configure_file("${PROJECT_SOURCE_DIR}/build_support/benchmark_CMakeLists.txt.in" benchmark-download/CMakeLists.txt)
-execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" "-DCMAKE_BUILD_TYPE=Release ."
+execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" "-DCMAKE_BUILD_TYPE=Release" .
         RESULT_VARIABLE result
         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/benchmark-download")
 if(result)
