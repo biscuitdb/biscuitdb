@@ -2,4 +2,4 @@
 
 #include "gtest/gtest.h"
 
-TEST(biscuit, dummy) { ASSERT_TRUE(true); }
+TEST(biscuit, dummy) { ASSERT_TRUE(false); }
