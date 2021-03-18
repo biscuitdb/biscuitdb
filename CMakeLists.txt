@@ -279,7 +279,7 @@ target_link_libraries(biscuitdb_test PUBLIC biscuitdb_objlib gtest)
 # HEADER Benchmarks.
 #######################################################################################################################
 
-set(BENCHMARK_ENABLE_GTEST_TESTS OFF)
+set(BENCHMARK_ENABLE_TESTING OFF)
 
 configure_file("${PROJECT_SOURCE_DIR}/build_support/benchmark_CMakeLists.txt.in" benchmark-download/CMakeLists.txt)
 execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
