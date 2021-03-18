@@ -62,7 +62,7 @@
 #######################################################################################################################
 
 # Ubuntu 20.04 ships with CMake version 3.16.3. But CI on Mac is outdated and picking up 3.15.
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.16)
 
 # CMake has extremely limited support for multi-line string literals. Therefore an explicit CONCAT call is used here.
 string(
