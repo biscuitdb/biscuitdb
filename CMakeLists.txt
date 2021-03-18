@@ -248,9 +248,17 @@ enable_testing()
 # gmock gtest https://crascit.com/2015/07/25/cmake-gtest/
 configure_file("${PROJECT_SOURCE_DIR}/build_support/gtest_CMakeLists.txt.in" googletest-download/CMakeLists.txt)
 execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
+        RESULT_VARIABLE result
         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/googletest-download")
+if(result)
+        message(FATAL_ERROR "CMake step for gtest failed: ${result}")
+endif()
 execute_process(COMMAND "${CMAKE_COMMAND}" --build .
+        RESULT_VARIABLE result
         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/googletest-download")
+if(result)
+        message(FATAL_ERROR "Build step for gtest failed: ${result}")
+endif()
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)  # don't override our compiler/linker options when building gtest
 add_subdirectory("${CMAKE_BINARY_DIR}/googletest-src" "${CMAKE_BINARY_DIR}/googletest-build" EXCLUDE_FROM_ALL)
 
@@ -271,8 +279,10 @@ target_link_libraries(biscuitdb_test PUBLIC biscuitdb_objlib gtest)
 # HEADER Benchmarks.
 #######################################################################################################################
 
+set(BENCHMARK_ENABLE_GTEST_TESTS OFF)
+
 configure_file("${PROJECT_SOURCE_DIR}/build_support/benchmark_CMakeLists.txt.in" benchmark-download/CMakeLists.txt)
-execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" "-DCMAKE_BUILD_TYPE=Release" .
+execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
         RESULT_VARIABLE result
         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/benchmark-download")
 if(result)
