@@ -115,7 +115,7 @@ install() {
       
       # Check Ubuntu version
       case $VERSION in
-        20.04) install_linux ;;
+        20.*) install_linux ;;
         *) give_up $DISTRO $VERSION;;
       esac
       ;;
