@@ -156,7 +156,7 @@ set(BISCUITDB_INCLUDE_DIRECTORIES "")
 # Add compilation flags to BISCUITDB_COMPILE_OPTIONS based on the current CMAKE_BUILD_TYPE.
 string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG")
-    list(APPEND BISCUITDB_COMPILE_OPTIONS "-ggdb" "-O0" "-fno-omit-frame-pointer" "-fno-optimize-sibling-calls" "--coverage")
+    list(APPEND BISCUITDB_COMPILE_OPTIONS "-ggdb" "-O0" "-fno-omit-frame-pointer" "-fno-optimize-sibling-calls")
 elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "FASTDEBUG")
     list(APPEND BISCUITDB_COMPILE_OPTIONS "-ggdb" "-O1" "-fno-omit-frame-pointer" "-fno-optimize-sibling-calls")
 elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "RELEASE")
@@ -236,7 +236,7 @@ target_link_options(biscuitdb_static PUBLIC         # PUBLIC: all consumers of t
 
 add_executable(biscuitdb src/main/main.cpp)
 target_compile_options(biscuitdb PRIVATE "-Werror" "-Wall")
-target_link_libraries(biscuitdb biscuitdb_static --coverage)
+target_link_libraries(biscuitdb biscuitdb_static)
 
 #######################################################################################################################
 # HEADER Tests.
@@ -270,10 +270,10 @@ file(GLOB_RECURSE
     )
 
 add_executable(biscuitdb_test ${BISCUITDB_TEST_SOURCES})
+target_compile_options(biscuitdb_test PUBLIC "--coverage")
+target_link_libraries(biscuitdb_test PUBLIC biscuitdb_static gtest --coverage)
 
 add_test(NAME biscuitdb_test COMMAND biscuitdb_test)
-
-target_link_libraries(biscuitdb_test PUBLIC biscuitdb_static gtest --coverage)
 
 #######################################################################################################################
 # HEADER Benchmarks.
@@ -305,10 +305,7 @@ file(GLOB_RECURSE
     )
 
 add_executable(biscuitdb_benchmark ${BISCUITDB_BENCHMARK_SOURCES})
-
-# add_test(NAME biscuitdb_benchmark COMMAND biscuitdb_benchmark)
-
-target_link_libraries(biscuitdb_benchmark PUBLIC biscuitdb_static benchmark --coverage)
+target_link_libraries(biscuitdb_benchmark PUBLIC biscuitdb_static benchmark)
 
 #######################################################################################################################
 # HEADER Generated file destinations.
