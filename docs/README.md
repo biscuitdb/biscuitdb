@@ -36,6 +36,8 @@ You should learn a little about the following:
 
 - You should know these targets.
   - `biscuitdb`: Building will build the `biscuitdb` binary and all its dependencies. Running will run the DBMS.
+  - `biscuitdb_benchmark`: Building will build and link the `biscuitdb` object file to the `benchmark` library. Running will run the benchmarks.
+  - `test`: Building will run all unit tests using `gtest`.
   - `format`: Building will run the formatter `clang-format` on the codebase with our rules. Use this every time right before you commit and right before you make a pull request!
   - `check-format`: Building will check if the codebase is correctly formatted according to `clang-format` with our rules.
   - `check-clang-tidy`: Building will check if the codebase passes the `clang-tidy` static analyzer tests with our rules.
@@ -63,7 +65,7 @@ If you run into issues, you may need your default `python` to point to a `python
 
 ### Running tests locally
 
-Use make test or ninja test to run inside your build folder.
+Use `make test` or `ninja test` to run inside your build folder.
 
 ### Benchmarks
 
