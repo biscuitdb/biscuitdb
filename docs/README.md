@@ -7,7 +7,7 @@
 
 ## Getting Started
 
-Hi! Welcome to JU-DB Group.
+Hi! Welcome to biscuitdb Group.
 
 ### System setup
 
@@ -23,21 +23,21 @@ Hi! Welcome to JU-DB Group.
 
 You should learn a little about the following:
 
-1. [git](https://github.com/ju-db/biscuitdb/tree/master/docs/tech_git.md)
-2. [C++ and how we use it](https://github.com/ju-db/biscuitdb/tree/master/docs/cpp_guidelines.md)
+1. [git](https://github.com/biscuitdb/biscuitdb/tree/master/docs/tech_git.md)
+2. [C++ and how we use it](https://github.com/biscuitdb/biscuitdb/tree/master/docs/cpp_guidelines.md)
 
 ## Configuration
 
 ### CMake flags to know
 
-- We try our best to list all available options in [CMakeLists.txt](https://github.com/ju-db/biscuitdb/blob/master/CMakeLists.txt). Search for `# HEADER CMake options and global variables.`
+- We try our best to list all available options in [CMakeLists.txt](https://github.com/biscuitdb/biscuitdb/blob/master/CMakeLists.txt). Search for `# HEADER CMake options and global variables.`
 
 ### CMake targets to know
 
 - You should know these targets.
   - `biscuitdb`: Building will build the `biscuitdb` binary and all its dependencies. Running will run the DBMS.
   - `biscuitdb_benchmark`: Building will build and link the `biscuitdb` object file to the `benchmark` library. Running will run the benchmarks.
-  - `test`: Building will run all unit tests using `gtest`.
+  - `test`: Building will run all unit tests using `gtest`. This will not show specifics of failed test, run `build/bin/biscuitdb_test` for detailed info.
   - `format`: Building will run the formatter `clang-format` on the codebase with our rules. Use this every time right before you commit and right before you make a pull request!
   - `check-format`: Building will check if the codebase is correctly formatted according to `clang-format` with our rules.
   - `check-clang-tidy`: Building will check if the codebase passes the `clang-tidy` static analyzer tests with our rules.
@@ -58,18 +58,24 @@ If you run into issues, you may need your default `python` to point to a `python
 4. Push your code.
    - Make sure you run tests locally! See below.
    - `git push -u origin my_new_branch`
-5. Go to GitHub and open a [new pull request](https://github.com/ju-db/biscuitdb/compare).
+5. Go to GitHub and open a [new pull request](https://github.com/biscuitdb/biscuitdb/compare).
 6. When a pull request is opened, this triggers our Continuous Integration environment on circle-ci.
    - CI will clone the repo, apply your changes, and make sure that formatting, linting, tests, etc pass.
    - Code has to pass all the checks for it to be merged!
 
 ### Running tests locally
 
-Use `make test` or `ninja test` to run inside your build folder.
+Use `make test` or `ninja test` to run inside your build folder to run all tests.
+
+For detailed test info:
+1. Go to the folder: `cd ~/biscuitdb/build`
+2. Generate optimized config with `cmake -GNinja .. -DCMAKE_BUILD_TYPE=Release`
+3. Build project with `ninja`
+4. Run `./bin/biscuitdb_test`
 
 ### Benchmarks
 
 1. Go to the folder: `cd ~/biscuitdb/build`
 2. Generate optimized config with `cmake -GNinja .. -DCMAKE_BUILD_TYPE=Release`
 3. Build project with `ninja`
-4. Run `./biscuitdb_benchmark [...options]`
+4. Run `./bin/biscuitdb_benchmark [...options]`

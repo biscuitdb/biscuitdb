@@ -73,7 +73,7 @@ The `test/util` folder should have no sub-directories. In most cases, one test u
 
 ### C++ Code Style
 
-See [here](https://github.com/ju-db/biscuitdb/tree/master/docs/cpp_guidelines_code_style.md).
+See [here](https://github.com/biscuitdb/biscuitdb/tree/master/docs/cpp_guidelines_code_style.md).
 
 ## Compiler
 
@@ -89,7 +89,7 @@ How is the compiler actually invoked?
 
 For example, to manually compile BiscuitDB, this is what you would do:
 
-1. Clone the BiscuitDB repo: `git clone https://github.com/ju-db/biscuitdb.git`
+1. Clone the BiscuitDB repo: `git clone https://github.com/biscuitdb/biscuitdb.git`
 2. Create a build folder to build everything in: `mkdir build`
 3. Go to the build folder: `cd build`
 4. Generate a build system with CMake, passing in whatever arguments are desired: `cmake -GNinja -DCMAKE_BUILD_TYPE=Release`
@@ -111,8 +111,8 @@ If you need to do complex debugging, you may want to check out the following lin
 
 Unit tests are critical for ensuring the correct functionality of your modules and reduce time spent on debugging. It can help prevent regressions. We use [googletest](https://github.com/google/googletest), a nice unit-testing framework for C++ projects. 
 
-You should write unit test cases for each class/algorithm that you have added or modified. See the testing section for detail. Try to come up with test cases that make sure that the module exhibits the desired behavior. Some developers even suggest writing the unit tests before implementing the code. Make sure that you include corner cases, and try to find off-by-one errors. 
+You should write unit test cases for each class/algorithm that you have added or modified. See the testing section for detail. Try to come up with test cases that make sure that the module exhibits the desired behavior. Some developers even suggest writing the unit tests before implementing the code. Make sure that you include corner cases, and try to find off-by-one errors.
 
 ## Documentation
 
-See [here](https://github.com/ju-db/biscuitdb/tree/master/docs/cpp_guidelines_code_style.md).
+See [here](https://github.com/biscuitdb/biscuitdb/tree/master/docs/cpp_guidelines_code_style.md).

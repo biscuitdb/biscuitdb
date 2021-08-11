@@ -68,11 +68,9 @@ cmake_minimum_required(VERSION 3.16)
 string(
         CONCAT
         BISCUITDB_DESCRIPTION
-        "BiscuitDB is an in-memory relational DBMS designed from the ground up for autonomous deployment by the Database "
-        "Group at the Department of Computer Science and Engineering, Jadavpur University. Our research focuses on "
+        "BiscuitDB is an in-memory relational DBMS designed from the ground up for autonomous deployment. Our research focuses on "
         "building system components that support such self-driving operation with little to no human guidance. We seek to "
-        "create a system that is better than traditional disk based database systems both in terms of performane and "
-        "reliability"
+        "create a system that is better than traditional disk based database systems both in terms of performane and reliability"
 )
 
 # Set the name of the CMake project to BiscuitDB. This also automatically defines various magic variables,
@@ -183,6 +181,8 @@ file(GLOB_RECURSE
         CONFIGURE_DEPENDS               # See above. Ask CMake to regenerate the build system if these files change.
         ${PROJECT_SOURCE_DIR}/src/*.cpp
         ${PROJECT_SOURCE_DIR}/src/include/*.h
+        ${PROJECT_SOURCE_DIR}/third_party/*.cpp
+        ${PROJECT_SOURCE_DIR}/third_party/*.h
     )
 
 # Remove the main program from BiscuitDB sources.
@@ -304,6 +304,7 @@ file(GLOB_RECURSE
     )
 
 add_executable(biscuitdb_benchmark ${BISCUITDB_BENCHMARK_SOURCES})
+add_test(NAME biscuitdb_benchmark COMMAND biscuitdb_benchmark)
 target_link_libraries(biscuitdb_benchmark PUBLIC biscuitdb_static benchmark --coverage)
 
 #######################################################################################################################
@@ -313,6 +314,8 @@ target_link_libraries(biscuitdb_benchmark PUBLIC biscuitdb_static benchmark --co
 set_target_properties(
         biscuitdb_static
         biscuitdb
+        biscuitdb_test
+        biscuitdb_benchmark
         PROPERTIES
         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
@@ -346,13 +349,11 @@ set(CLANG_TOOLS_SEARCH_PATH
         "/usr/local/bin"
         "/usr/bin"
         "/usr/local/opt/llvm/bin"
-        "/usr/local/opt/llvm@8/bin"
-        "/usr/local/Cellar/llvm/8.0.1/bin"
         )
 
 # clang-format
 find_program(CLANG_FORMAT_BIN
-        NAMES clang-format clang-format-8
+        NAMES clang-format-11
         HINTS ${CLANG_TOOLS_SEARCH_PATH})
 if ("${CLANG_FORMAT_BIN}" STREQUAL "CLANG_FORMAT_BIN-NOTFOUND")
     message(WARNING "biscuitdb/main couldn't find clang-format.")
@@ -362,7 +363,7 @@ endif()
 
 # clang-tidy
 find_program(CLANG_TIDY_BIN
-        NAMES clang-tidy clang-tidy-8
+        NAMES clang-tidy-11
         HINTS ${CLANG_TOOLS_SEARCH_PATH})
 if ("${CLANG_TIDY_BIN}" STREQUAL "CLANG_TIDY_BIN-NOTFOUND")
     message(WARNING "biscuitdb/main couldn't find clang-tidy.")
@@ -409,7 +410,7 @@ unset(${CPPLINT_BIN})
 # check-format      :   Check if the codebase is formatted according to standards.
 #######################################################################################################################
 
-find_program(CLANG_FORMAT_BIN NAMES clang-format-8 clang-format HINTS ${CLANG_TOOLS_SEARCH_PATH})
+find_program(CLANG_FORMAT_BIN NAMES clang-format-11 HINTS ${CLANG_TOOLS_SEARCH_PATH})
 if ("${CLANG_FORMAT_BIN}" STREQUAL "CLANG_FORMAT_BIN-NOTFOUND")
     message(STATUS "[MISSING] clang-format not found, no format and no check-format.")
 else ()
@@ -453,7 +454,7 @@ unset(CLANG_FORMAT_BIN)
 # check-clang-tidy  :   Run clang-tidy static analysis on the codebase.
 #######################################################################################################################
 
-find_program(CLANG_TIDY_BIN NAMES clang-tidy-8 clang-tidy HINTS ${CLANG_TOOLS_SEARCH_PATH})
+find_program(CLANG_TIDY_BIN NAMES clang-tidy-11 HINTS ${CLANG_TOOLS_SEARCH_PATH})
 if ("${CLANG_TIDY_BIN}" STREQUAL "CLANG_TIDY_BIN-NOTFOUND")
     message(STATUS "[MISSING] clang-tidy not found, no check-clang-tidy.")
 else ()

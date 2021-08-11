@@ -7,7 +7,7 @@
  * instance.
  *
  *
- * Database Group, Department of Computer Science and Engineering, Jadavpur University
+ * BiscuitDB
  *
  *
  * IDENTIFICATION
