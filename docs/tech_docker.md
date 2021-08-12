@@ -21,12 +21,12 @@ See [Docker CE](https://www.docker.com/community-edition) if additional informat
 
 1. Launch Docker.
 2. From the folder containing the Dockerfile, build the Docker image.
-    - `docker build -t ju-db/biscuitdb .`
+    - `docker build -t biscuitdb/biscuitdb .`
     - docker will load your local repo into a `/biscuitdb` directory in the image
 
 ## Usage
 
-1. Run the Docker image: `docker run -itd --name build ju-db/biscuitdb`
+1. Run the Docker image: `docker run -itd --name build biscuitdb/biscuitdb`
 2. Run CMake:
   - `docker exec build cmake ..`
   - `docker exec build make`

@@ -13,9 +13,10 @@
 
 LINUX_BUILD_PACKAGES=(\
   "build-essential" \
-  "clang" \
-  "clang-format" \
-  "clang-tidy" \
+  "clang-11" \
+  "clang-format-11" \
+  "clang-tidy-11" \
+  "llvm-11" \
   "cmake" \
   "git" \
   "pkg-config" \
@@ -42,6 +43,7 @@ LINUX_TEST_PACKAGES=(\
 PYTHON_BUILD_PACKAGES=(
   "cpplint"
 )
+
 PYTHON_TEST_PACKAGES=(
 )
 
@@ -56,6 +58,7 @@ main() {
   if [ -z "$INSTALL_TYPE" ]; then
     INSTALL_TYPE="build"
   fi
+
   ALLOWED=("build" "test" "all")
   FOUND=0
   for key in "${ALLOWED[@]}"; do
@@ -88,14 +91,14 @@ give_up() {
   OS=$1
   VERSION=$2
   [ ! -z "$VERSION" ] && VERSION=" $VERSION"
-  
+
   echo
   echo "Unsupported distribution '${OS}${VERSION}'"
   echo "Please contact our support team for additional help."
   echo "Be sure to include the contents of this message."
   echo "Platform: $(uname -a)"
   echo
-  echo "https://github.com/ju-db/biscuitdb/issues"
+  echo "https://github.com/biscuitdb/biscuitdb/issues"
   echo
   exit 1
 }
@@ -109,10 +112,10 @@ install() {
     LINUX)
       DISTRO=$(cat /etc/os-release | grep '^ID=' | cut -d '=' -f 2 | tr "[:lower:]" "[:upper:]" | tr -d '"')
       VERSION=$(cat /etc/os-release | grep '^VERSION_ID=' | cut -d '"' -f 2)
-      
+
       # We only support Ubuntu right now
       [ "$DISTRO" != "UBUNTU" ] && give_up $DISTRO $VERSION
-      
+
       # Check Ubuntu version
       case $VERSION in
         20.*) install_linux ;;
@@ -120,7 +123,6 @@ install() {
       esac
       ;;
     DARWIN) install_darwin ;;
-
 
     *) give_up $UNAME $VERSION;;
   esac
@@ -140,24 +142,33 @@ install_linux() {
   if [ "$INSTALL_TYPE" == "build" ] || [ "$INSTALL_TYPE" = "all" ]; then
     apt-get -y install $( IFS=$' '; echo "${LINUX_BUILD_PACKAGES[*]}" )
   fi
+  
   if [ "$INSTALL_TYPE" == "test" ] || [ "$INSTALL_TYPE" = "all" ]; then
     apt-get -y install $( IFS=$' '; echo "${LINUX_TEST_PACKAGES[*]}" )
   fi
 
   if [ "$INSTALL_TYPE" == "build" ] || [ "$INSTALL_TYPE" = "all" ]; then
     for pkg in "${PYTHON_BUILD_PACKAGES[@]}"; do
-      python3 -m pip show $pkg || python3 -m pip install $pkg
+      if [ "$pkg" == "cpplint" ]; then
+        sudo python3 -m pip show $pkg || sudo python3 -m pip install $pkg
+      else
+        python3 -m pip show $pkg || python3 -m pip install $pkg
+      fi
     done
   fi
+
   if [ "$INSTALL_TYPE" == "test" ] || [ "$INSTALL_TYPE" = "all" ]; then
     for pkg in "${PYTHON_TEST_PACKAGES[@]}"; do
-      python3 -m pip show $pkg || python3 -m pip install $pkg
+      if [ "$pkg" == "cpplint" ]; then
+        sudo python3 -m pip show $pkg || sudo python3 -m pip install $pkg
+      else
+        python3 -m pip show $pkg || python3 -m pip install $pkg
+      fi
     done
   fi
 }
 
-install_darwin(){
-
+install_darwin() {
   echo "Starting install on darwin, this may take some time ..."
   # Check for Homebrew, install if we don't have it
   if test ! $(which brew); then
@@ -169,16 +180,13 @@ install_darwin(){
       echo "Installing pip..."
       brew install python
   fi
- 
+
   if test ! $(which pip); then
       echo "Installing pip..."
       curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
       python3 get-pip.py
       rm get-pip.py
   fi
-  
-
-
 
   # Update homebrew recipes
   brew update
@@ -194,6 +202,7 @@ install_darwin(){
     ln -s "$(brew --prefix llvm)/bin/clang-apply-replacements" "/usr/local/bin/clang-apply-replacements"
     brew install $( IFS=$' '; echo "${DARWIN_BUILD_PACKAGES[*]}" )
   fi
+
   if [ "$INSTALL_TYPE" == "test" ] || [ "$INSTALL_TYPE" = "all" ]; then
     brew install $( IFS=$' '; echo "${LINUX_TEST_PACKAGES[*]}" )
   fi
@@ -203,15 +212,12 @@ install_darwin(){
       python3 -m pip show $pkg || python3 -m pip install $pkg
     done
   fi
+
   if [ "$INSTALL_TYPE" == "test" ] || [ "$INSTALL_TYPE" = "all" ]; then
     for pkg in "${PYTHON_TEST_PACKAGES[@]}"; do
       python3 -m pip show $pkg || python3 -m pip install $pkg
     done
   fi
-
-
-
-
 }
 
 main "$@"
