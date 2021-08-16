@@ -60,6 +60,7 @@ if is_py2:
 else:
     import queue as queue
 
+
 def find_compilation_database(path):
     """Adjusts the directory until a compilation database is found."""
     result = './'
@@ -110,16 +111,17 @@ def get_tidy_invocation(f, clang_tidy_binary, checks, tmpdir, build_path,
     start.append(f)
     return start
 
+
 def merge_replacement_files(tmpdir, mergefile):
     """Merge all replacement files in a directory into a single file"""
     # The fixes suggested by clang-tidy >= 4.0.0 are given under
     # the top level key 'Diagnostics' in the output yaml files
-    mergekey="Diagnostics"
-    merged=[]
+    mergekey = "Diagnostics"
+    merged = []
     for replacefile in glob.iglob(os.path.join(tmpdir, '*.yaml')):
         content = yaml.safe_load(open(replacefile, 'r'))
         if not content:
-            continue # Skip empty files.
+            continue  # Skip empty files.
         merged.extend(content.get(mergekey, []))
 
     if merged:
@@ -127,17 +129,19 @@ def merge_replacement_files(tmpdir, mergefile):
         # include/clang/Tooling/ReplacementsYaml.h, but the value
         # is actually never used inside clang-apply-replacements,
         # so we set it to '' here.
-        output = { 'MainSourceFile': '', mergekey: merged }
+        output = {'MainSourceFile': '', mergekey: merged}
         with open(mergefile, 'w') as out:
             yaml.safe_dump(output, out)
     else:
         # Empty the file:
         open(mergefile, 'w').close()
 
+
 def check_clang_apply_replacements_binary(args):
     """Checks if invoking supplied clang-apply-replacements binary works."""
     try:
-        subprocess.check_call([args.clang_apply_replacements_binary, '--version'])
+        subprocess.check_call(
+            [args.clang_apply_replacements_binary, '--version'])
     except:
         print('Unable to run clang-apply-replacements. Is clang-apply-replacements '
               'binary correctly specified?', file=sys.stderr)
@@ -172,7 +176,8 @@ def run_tidy(args, tmpdir, build_path, queue, lock, failed_files):
             queue.task_done()
             continue
 
-        proc = subprocess.Popen(invocation, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc = subprocess.Popen(
+            invocation, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output, err = proc.communicate()
         if proc.returncode != 0:
             failed_files.append(name)
@@ -192,6 +197,7 @@ def run_tidy(args, tmpdir, build_path, queue, lock, failed_files):
                 sys.stdout.write('\n')
                 sys.stdout.write(output)
         queue.task_done()
+
 
 def main():
     parser = argparse.ArgumentParser(description='Runs clang-tidy over all files '
@@ -215,7 +221,7 @@ def main():
                              'When the value is empty, clang-tidy will '
                              'attempt to find a file named .clang-tidy for '
                              'each source file in its parent directories.')
-    parser.add_argument('-header-filter', default=None,
+    parser.add_argument('-header-filter', default="*build*",
                         help='regular expression matching the names of the '
                              'headers to output diagnostics from. Diagnostics from '
                              'the main file of each translation unit are always '
@@ -271,7 +277,8 @@ def main():
              for entry in database]
 
     # Hacks
-    files = list(filter(lambda filename: not "build" in filename, list(set(files))))
+    files = list(
+        filter(lambda filename: not "build" in filename, list(set(files))))
 
     max_task = args.j
     if max_task == 0:
@@ -335,7 +342,8 @@ def main():
             # TERRIER: We want to see the failed files
             print('The files that failed were:')
             print(pprint.pformat(failed_files))
-            print('Note that a failing .h file will fail all the .cpp files that include it.\n')
+            print(
+                'Note that a failing .h file will fail all the .cpp files that include it.\n')
 
     except KeyboardInterrupt:
         # This is a sad hack. Unfortunately subprocess goes
@@ -352,7 +360,7 @@ def main():
         except:
             print('Error exporting fixes.\n', file=sys.stderr)
             traceback.print_exc()
-            return_code=1
+            return_code = 1
 
     if args.fix:
         print('Applying fixes ...')
@@ -361,13 +369,14 @@ def main():
         except:
             print('Error applying fixes.\n', file=sys.stderr)
             traceback.print_exc()
-            return_code=1
+            return_code = 1
 
     if tmpdir:
         shutil.rmtree(tmpdir)
     print("")
     sys.stdout.flush()
     sys.exit(return_code)
+
 
 if __name__ == '__main__':
     main()

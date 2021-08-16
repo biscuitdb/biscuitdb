@@ -50,6 +50,8 @@
 #   HEADER Project definition.
 #   HEADER Safety checks.
 #   HEADER System info.
+#   HEADER CMake options and global variables.
+#   HEADER Dependencies.
 #   HEADER biscuitdb libraries.
 #   HEADER biscuitdb binary.
 #   HEADER Tests.
@@ -169,6 +171,30 @@ endif ()
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 
 #######################################################################################################################
+# HEADER Dependencies.
+#######################################################################################################################
+
+set(JUCC_DEPENDENCIES "")
+
+# spdlog for logging
+configure_file("${PROJECT_SOURCE_DIR}/build_support/spdlog_CMakeLists.txt.in" spdlog-download/CMakeLists.txt)
+execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/spdlog-download")
+if(result)
+        message(FATAL_ERROR "CMake step for spdlog failed: ${result}")
+endif()
+execute_process(COMMAND "${CMAKE_COMMAND}" --build . --config "Release"
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/spdlog-download")
+if(result)
+        message(FATAL_ERROR "Build step for spdlog failed: ${result}")
+endif()
+set(spdlog_force_shared_crt ON CACHE BOOL "" FORCE)  # don't override our compiler/linker options when building spdlog
+add_subdirectory("${CMAKE_BINARY_DIR}/spdlog-src" "${CMAKE_BINARY_DIR}/spdlog-build")
+list(APPEND JUCC_DEPENDENCIES spdlog)
+
+#######################################################################################################################
 # HEADER biscuitdb libraries.
 # biscuitdb_objlib      :   BiscuitDB object library, built once and linked into both static and shared targets.
 # biscuitdb_static      :   All of BiscuitDB functionality exposed as a static library.
@@ -192,6 +218,7 @@ list(REMOVE_ITEM BISCUITDB_SRCS ${PROJECT_SOURCE_DIR}/src/main/main.cpp)
 # The OBJECT library is built first so that the same .o files can be linked into static and shared libraries.
 # This allows both biscuitdb_static and biscuitdb_shared to be built with a single compilation of translation units.
 add_library(biscuitdb_objlib OBJECT ${BISCUITDB_SRCS})
+target_link_libraries(biscuitdb_objlib PUBLIC ${JUCC_DEPENDENCIES})  # Add Dependencies required for compilation
 
 set_target_properties(biscuitdb_objlib PROPERTIES
         POSITION_INDEPENDENT_CODE ON                # Required for static linking into other shared libraries.
