@@ -22,12 +22,7 @@ class LoggerConfig {
   const int ASYNC_FLUSH_TIME = 3;
 
  public:
-  LoggerConfig() {
-#ifndef NDEBUG
-    spdlog::set_level(spdlog::level::debug);
-#endif
-    spdlog::flush_every(std::chrono::seconds(ASYNC_FLUSH_TIME));
-  }
+  LoggerConfig();
 };
 
 /**

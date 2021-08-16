@@ -1,6 +1,13 @@
-#include <common/logger.h>
+#include "common/logger.h"
 
 namespace biscuit::common {
+
+LoggerConfig::LoggerConfig() {
+#ifndef NDEBUG
+  spdlog::set_level(spdlog::level::debug);
+#endif
+  spdlog::flush_every(std::chrono::seconds(ASYNC_FLUSH_TIME));
+}
 
 const std::shared_ptr<spdlog::logger> Logger::LOG = spdlog::basic_logger_mt("default_logger", LOG_FILE);
 const LoggerConfig Logger::CONFIG = LoggerConfig();
