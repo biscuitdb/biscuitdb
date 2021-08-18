@@ -194,6 +194,27 @@ set(spdlog_force_shared_crt ON CACHE BOOL "" FORCE)  # don't override our compil
 add_subdirectory("${CMAKE_BINARY_DIR}/spdlog-src" "${CMAKE_BINARY_DIR}/spdlog-build")
 list(APPEND JUCC_DEPENDENCIES spdlog)
 
+# yaml-cpp for config file parsing
+configure_file("${PROJECT_SOURCE_DIR}/build_support/yaml-cpp_CMakeLists.txt.in" yaml-cpp-download/CMakeLists.txt)
+execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/yaml-cpp-download")
+if(result)
+        message(FATAL_ERROR "CMake step for yaml-cpp failed: ${result}")
+endif()
+execute_process(COMMAND "${CMAKE_COMMAND}" --build . --config "Release"
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/yaml-cpp-download")
+if(result)
+        message(FATAL_ERROR "Build step for yaml-cpp failed: ${result}")
+endif()
+set(yaml-cpp_force_shared_crt ON CACHE BOOL "" FORCE)  # don't override our compiler/linker options when building yaml-cpp
+add_subdirectory("${CMAKE_BINARY_DIR}/yaml-cpp-src" "${CMAKE_BINARY_DIR}/yaml-cpp-build")
+list(APPEND JUCC_DEPENDENCIES yaml-cpp)
+target_compile_options(yaml-cpp PRIVATE
+                "-w"                                   # ignore warnings for external dependency
+                )
+
 #######################################################################################################################
 # HEADER biscuitdb libraries.
 # biscuitdb_objlib      :   BiscuitDB object library, built once and linked into both static and shared targets.
