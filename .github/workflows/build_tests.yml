@@ -18,7 +18,6 @@ jobs:
         - name: setup environment
           run: |
             export DEBIAN_FRONTEND="noninteractive"
-            mkdir build
             sudo apt-get -y update
         
         - name: installing dependecies
