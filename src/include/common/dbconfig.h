@@ -30,6 +30,10 @@ class DBConfig {
    * Usage: DBConfig::GetConfig()["key"] ...
    */
   static const json &GetConfig();
+  /**
+   * Check if config has been cached in memory.
+   */
+  static bool IsCached();
 };
 
 }  // namespace biscuit::common

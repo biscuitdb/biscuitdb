@@ -26,4 +26,6 @@ const json &DBConfig::GetConfig() {
   return config;
 }
 
+bool DBConfig::IsCached() { return cached; }
+
 }  // namespace biscuit::common

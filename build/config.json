@@ -6,5 +6,8 @@
     "async_flush_time": 5,
     "rotating_log_max_size": 1048576,
     "rotating_log_count": 5
+  },
+  "test": {
+    "key": "value"
   }
 }

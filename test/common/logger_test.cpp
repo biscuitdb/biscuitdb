@@ -7,10 +7,10 @@
  * Module tested manually.
  */
 
-TEST(logger, LoggerShouldLogDebugMessage) { LOG_DEBUG("debug: test message"); }
+TEST(logger, LoggerShouldLogDebugMessage) { LOG_DEBUG("test debug message"); }
 
-TEST(logger, LoggerShouldLogInfoMessage) { LOG_INFO("info: test message"); }
+TEST(logger, LoggerShouldLogInfoMessage) { LOG_INFO("test info message"); }
 
-TEST(logger, LoggerShouldLogWarningMessage) { LOG_WARN("warn: test message"); }
+TEST(logger, LoggerShouldLogWarningMessage) { LOG_WARN("test warn message"); }
 
-TEST(logger, LoggerShouldLogErrorMessage) { LOG_ERROR("error: test message"); }
+TEST(logger, LoggerShouldLogErrorMessage) { LOG_ERROR("test error message"); }
