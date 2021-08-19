@@ -17,6 +17,9 @@ Again, you should only create PR once you are reasonably confident you are near 
 - [x] Add optional property support
 - [ ] Fix memory leaks
 
+### Testing
+Describe how you have tested the changes.
+
 ## Further Work
 If your PR unlocked the potential for further improvement, please note them here and create additional issues! Do the same if you discovered bugs in the process of development.
 
@@ -31,5 +34,7 @@ Here's an empty template to format yourself!
 - [ ] Foo
 - [ ] Bar
 - [ ] Baz
+
+## Testing
 
 ## Further work

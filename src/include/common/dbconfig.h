@@ -10,7 +10,7 @@ namespace biscuit::common {
 
 /**
  * Path for config file.
- */ 
+ */
 const char CONFIG_PATH[] = "config.json";
 
 /**
