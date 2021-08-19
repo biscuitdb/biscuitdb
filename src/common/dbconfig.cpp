@@ -1,33 +1,29 @@
 #include "common/dbconfig.h"
 
+#include <fstream>
 #include <iostream>
 
 namespace biscuit::common {
 
-bool DBConfig::cached = false;
-YAML::Node DBConfig::CONFIG = YAML::Node();
-
-void DBConfig::InitCache() {
-  if (!cached) {
-    CONFIG = YAML::LoadFile(CONFIG_PATH);
-    cached = true;
-  }
-}
-
-const std::string DBConfig::GetKey(const std::string &key) {
-  InitCache();
-  if (CONFIG[key]) {
-    return CONFIG[key].as<std::string>();
+json DBConfig::ReadConfig(const char *path) {
+  std::ifstream fin = std::ifstream(path);
+  if (fin.good()) {
+    json j;
+    fin >> j;
+    return j;
   }
   return nullptr;
 }
 
-const int DBConfig::GetKeyAsInt(const std::string &key) {
-  InitCache();
-  if (CONFIG[key]) {
-    return CONFIG[key].as<int>();
+json DBConfig::config = nullptr;
+bool DBConfig::cached = false;
+
+const json &DBConfig::GetConfig() {
+  if (!cached) {
+    config = ReadConfig(CONFIG_PATH);
+    cached = true;
   }
-  return 0;
+  return config;
 }
 
 }  // namespace biscuit::common

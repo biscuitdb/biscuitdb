@@ -174,7 +174,7 @@ message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 # HEADER Dependencies.
 #######################################################################################################################
 
-set(JUCC_DEPENDENCIES "")
+set(BISCUITDB_DEPENDENCIES "")
 
 # spdlog for logging
 configure_file("${PROJECT_SOURCE_DIR}/build_support/spdlog_CMakeLists.txt.in" spdlog-download/CMakeLists.txt)
@@ -192,28 +192,25 @@ if(result)
 endif()
 set(spdlog_force_shared_crt ON CACHE BOOL "" FORCE)  # don't override our compiler/linker options when building spdlog
 add_subdirectory("${CMAKE_BINARY_DIR}/spdlog-src" "${CMAKE_BINARY_DIR}/spdlog-build")
-list(APPEND JUCC_DEPENDENCIES spdlog)
+list(APPEND BISCUITDB_DEPENDENCIES spdlog)
 
-# yaml-cpp for config file parsing
-configure_file("${PROJECT_SOURCE_DIR}/build_support/yaml-cpp_CMakeLists.txt.in" yaml-cpp-download/CMakeLists.txt)
+# nlohmann_json for json support
+configure_file("${PROJECT_SOURCE_DIR}/build_support/nlohmann_json_CMakeLists.txt.in" nlohmann_json-download/CMakeLists.txt)
 execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
         RESULT_VARIABLE result
-        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/yaml-cpp-download")
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/nlohmann_json-download")
 if(result)
-        message(FATAL_ERROR "CMake step for yaml-cpp failed: ${result}")
+        message(FATAL_ERROR "CMake step for nlohmann_json failed: ${result}")
 endif()
 execute_process(COMMAND "${CMAKE_COMMAND}" --build . --config "Release"
         RESULT_VARIABLE result
-        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/yaml-cpp-download")
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/nlohmann_json-download")
 if(result)
-        message(FATAL_ERROR "Build step for yaml-cpp failed: ${result}")
+        message(FATAL_ERROR "Build step for nlohmann_json failed: ${result}")
 endif()
-set(yaml-cpp_force_shared_crt ON CACHE BOOL "" FORCE)  # don't override our compiler/linker options when building yaml-cpp
-add_subdirectory("${CMAKE_BINARY_DIR}/yaml-cpp-src" "${CMAKE_BINARY_DIR}/yaml-cpp-build")
-list(APPEND JUCC_DEPENDENCIES yaml-cpp)
-target_compile_options(yaml-cpp PRIVATE
-                "-w"                                   # ignore warnings for external dependency
-                )
+set(nlohmann_json_force_shared_crt ON CACHE BOOL "" FORCE)  # don't override our compiler/linker options when building nlohmann_json
+add_subdirectory("${CMAKE_BINARY_DIR}/nlohmann_json-src" "${CMAKE_BINARY_DIR}/nlohmann_json-build")
+list(APPEND BISCUITDB_DEPENDENCIES nlohmann_json)
 
 #######################################################################################################################
 # HEADER biscuitdb libraries.
@@ -239,7 +236,7 @@ list(REMOVE_ITEM BISCUITDB_SRCS ${PROJECT_SOURCE_DIR}/src/main/main.cpp)
 # The OBJECT library is built first so that the same .o files can be linked into static and shared libraries.
 # This allows both biscuitdb_static and biscuitdb_shared to be built with a single compilation of translation units.
 add_library(biscuitdb_objlib OBJECT ${BISCUITDB_SRCS})
-target_link_libraries(biscuitdb_objlib PUBLIC ${JUCC_DEPENDENCIES})  # Add Dependencies required for compilation
+target_link_libraries(biscuitdb_objlib PUBLIC ${BISCUITDB_DEPENDENCIES})  # Add Dependencies required for compilation
 
 set_target_properties(biscuitdb_objlib PROPERTIES
         POSITION_INDEPENDENT_CODE ON                # Required for static linking into other shared libraries.

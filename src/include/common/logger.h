@@ -14,17 +14,17 @@ namespace biscuit::common {
  */
 class LoggerConfig {
   /* Log file path */
-  const std::string LOG_PATH = DBConfig::GetKey("log_path");
+  const std::string LOG_PATH = DBConfig::GetConfig()["logger"]["log_path"];
   /* Logger name */
-  const std::string LOGGER_NAME = DBConfig::GetKey("logger_name");
+  const std::string LOGGER_NAME = DBConfig::GetConfig()["logger"]["logger_name"];
   /* Type of logger */
-  const std::string LOGGER_TYPE = DBConfig::GetKey("logger_type");
+  const std::string LOGGER_TYPE = DBConfig::GetConfig()["logger"]["logger_type"];
   /* Max file size for rotating log */
-  const int ROTATING_LOG_MAX_SIZE = DBConfig::GetKeyAsInt("rotating_log_max_size");
+  const int ROTATING_LOG_MAX_SIZE = DBConfig::GetConfig()["logger"]["rotating_log_max_size"];
   /* File count for rotating log */
-  const int ROTATING_LOG_COUNT = DBConfig::GetKeyAsInt("rotating_log_count");
-  /* Flush to disk every 3 seconds */
-  const int ASYNC_FLUSH_TIME = DBConfig::GetKeyAsInt("async_flush_time");
+  const int ROTATING_LOG_COUNT = DBConfig::GetConfig()["logger"]["rotating_log_count"];
+  /* Flush to disk every n seconds */
+  const int ASYNC_FLUSH_TIME = DBConfig::GetConfig()["logger"]["async_flush_time"];
 
   /* Valid Logger Types */
   static const char DEFAULT[];

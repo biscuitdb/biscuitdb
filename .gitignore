@@ -2,6 +2,9 @@
 build
 cmake-build-debug/
 
+# keep config.json
+!build/config.json
+
 # configs
 .idea
 .vscode

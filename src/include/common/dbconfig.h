@@ -1,27 +1,35 @@
 #ifndef BISCUIT_COMMON_DBCONFIG_H
 #define BISCUIT_COMMON_DBCONFIG_H
 
-/**
- * This stuff doesn't work.
- */
-
 #include <string>
 
-#include "yaml-cpp/yaml.h"
+#include "nlohmann/json.hpp"
+using json = nlohmann::json;
 
 namespace biscuit::common {
 
-const char CONFIG_PATH[] = "config.yml";
+/**
+ * Path for config file.
+ */ 
+const char CONFIG_PATH[] = "config.json";
 
+/**
+ * Global config reader. Initialized at bootstrap.
+ */
 class DBConfig {
+  static json config;
   static bool cached;
-  static YAML::Node CONFIG;
-
-  static void InitCache();
+  /**
+   * Reads json files and returns parsed json object or nullptr in case bad path.
+   */
+  static json ReadConfig(const char *path);
 
  public:
-  static const std::string GetKey(const std::string &key);
-  static const int GetKeyAsInt(const std::string &key);
+  /**
+   * Get reference to config json.
+   * Usage: DBConfig::GetConfig()["key"] ...
+   */
+  static const json &GetConfig();
 };
 
 }  // namespace biscuit::common
