@@ -1,5 +1,5 @@
 # build dir
-build
+build/*
 cmake-build-debug/
 
 # keep config.json
