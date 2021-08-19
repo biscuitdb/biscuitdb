@@ -20,7 +20,8 @@ class DBConfig {
   static json config;
   static bool cached;
   /**
-   * Reads json files and returns parsed json object or nullptr in case bad path.
+   * Reads json files and returns parsed json object.
+   * Throws ifstream::failure on error.
    */
   static json ReadConfig(const char *path);
 

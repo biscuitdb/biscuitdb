@@ -6,7 +6,6 @@
 
 namespace biscuit::common {
 
-const char LoggerConfig::DEFAULT[] = "default";
 const char LoggerConfig::DAILY_ROTATE[] = "daily-rotate";
 const char LoggerConfig::ROTATE[] = "rotate";
 
@@ -28,6 +27,7 @@ std::shared_ptr<spdlog::logger> LoggerConfig::GetNewLogger() const {
   } else if (LOGGER_TYPE == std::string(ROTATE)) {
     return spdlog::rotating_logger_mt(LOGGER_NAME, LOG_PATH, ROTATING_LOG_MAX_SIZE, ROTATING_LOG_COUNT);
   } else {
+    /* default to basic logger */
     return spdlog::basic_logger_mt(LOGGER_NAME, LOG_PATH);
   }
 }

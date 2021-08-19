@@ -27,7 +27,6 @@ class LoggerConfig {
   const int ASYNC_FLUSH_TIME = DBConfig::GetConfig()["logger"]["async_flush_time"];
 
   /* Valid Logger Types */
-  static const char DEFAULT[];
   static const char DAILY_ROTATE[];
   static const char ROTATE[];
 
