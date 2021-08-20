@@ -79,3 +79,9 @@ For detailed test info:
 2. Generate optimized config with `cmake -GNinja .. -DCMAKE_BUILD_TYPE=Release`
 3. Build project with `ninja`
 4. Run `./bin/biscuitdb_benchmark [...options]`
+
+### Logs
+
+Log file generated in `build/logs`
+
+Logs are flushed to disk asynchronously. Debug logs not printed when `-DCMAKE_BUILD_TYPE=Release`

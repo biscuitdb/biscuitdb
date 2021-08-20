@@ -20,7 +20,6 @@ The BiscuitDB project is built and tested on **Ubuntu 20.04**.
 git clone https://github.com/biscuitdb/biscuitdb.git
 cd biscuitdb
 sudo ./script/installation/packages.sh
-mkdir build
 cd build
 cmake -GNinja -DCMAKE_BUILD_TYPE=Release ..
 ninja biscuitdb
